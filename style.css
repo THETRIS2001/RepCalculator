@@ -164,7 +164,7 @@ button#calculate-btn:active {
 
 .toggle-chart-btn, .switch-chart-btn {
     background: transparent;
-    border: none;
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     padding: 10px 16px;
     border-radius: 12px;
