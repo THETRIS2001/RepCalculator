@@ -450,7 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const inv = inverseFormulas.find(f => f.name === formula.name);
             const data = labels.map(r => {
                 if (!inv || typeof inv.calculateWeight !== 'function') return 0;
-                return inv.calculateWeight(oneRmForFormula, r);
+                // A r=1 mostra esattamente l'1RM della formula (coerente con i box)
+                return r === 1 ? oneRmForFormula : inv.calculateWeight(oneRmForFormula, r);
             });
 
             // Primary formulas get special styling with different colors
