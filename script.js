@@ -356,8 +356,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (switchChartBtn) {
             switchChartBtn.style.display = 'none';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Passa a Fissato il peso -> Range Reps'
-                : 'Passa a Fissate le reps -> Range Peso';
+                ? 'Fissato il peso -> Range Reps'
+                : 'Fissate le reps -> Range Peso';
         }
 
         if (manualOneRmInput) {
@@ -473,36 +473,27 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         });
 
-        // Modalità alternativa: X = Peso (kg), Y = Ripetizioni (a 1RM medio)
+        // Modalità alternativa: X = Ripetizioni, Y = Peso (kg) usando 1RM di ciascuna formula
         if (isRepsVsWeight) {
-            const targetOneRm = latestAverageOneRm != null ? latestAverageOneRm : formulas.reduce((acc, f) => acc + f.calculate(weight, reps), 0) / formulas.length;
+            // Etichette: 1..20 ripetizioni
+            labels = Array.from({ length: 20 }, (_, i) => i + 1);
 
-            const minWeight = Math.max(0, Math.floor(weight * 0.5));
-            const maxWeight = Math.max(weight + 20, Math.ceil(weight * 1.3));
-            const step = 2;
-            labels = [];
-            for (let w = minWeight; w <= maxWeight; w += step) labels.push(w);
+            // Calcola l'1RM per ciascuna formula in base ai dati inseriti
+            const oneRmsByFormula = formulas.map(f => ({
+                name: f.name,
+                isPrimary: !!f.isPrimary,
+                oneRm: f.calculate(weight, reps)
+            }));
 
-            const predictRepsForWeight = (formula, w, target) => {
-                let bestR = 1;
-                let bestDiff = Infinity;
-                for (let r = 1; r <= 20; r++) {
-                    const est = formula.calculate(w, r);
-                    const diff = Math.abs(est - target);
-                    if (diff < bestDiff) {
-                        bestDiff = diff;
-                        bestR = r;
-                    }
-                }
-                return bestR;
-            };
+            // Costruisci i dataset: per ogni formula, peso a ogni reps usando l'1RM della formula
+            datasets = oneRmsByFormula.map((info, index) => {
+                const inv = inverseFormulas.find(g => g.name === info.name);
+                const data = labels.map(r => inv ? inv.calculateWeight(info.oneRm, r) : 0);
 
-            datasets = formulas.map((formula, index) => {
-                const data = labels.map(w => predictRepsForWeight(formula, w, targetOneRm));
-                if (formula.isPrimary) {
-                    const isPrimaryHevy = formula.name === 'hevy';
+                if (info.isPrimary) {
+                    const isPrimaryHevy = info.name === 'hevy';
                     return {
-                        label: ' ' + formula.name,
+                        label: ' ' + info.name,
                         data: data,
                         borderColor: isPrimaryHevy ? '#f97316' : '#3b82f6',
                         backgroundColor: isPrimaryHevy ? 'rgba(249, 115, 22, 0.1)' : 'rgba(59, 130, 246, 0.1)',
@@ -513,10 +504,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         order: 0
                     };
                 }
-                const hue = (index * 360 / formulas.length) % 360;
+
+                const hue = (index * 360 / oneRmsByFormula.length) % 360;
                 const borderColor = `hsla(${hue}, 70%, 50%, 1)`;
                 return {
-                    label: ' ' + formula.name,
+                    label: ' ' + info.name,
                     data: data,
                     borderColor: borderColor,
                     backgroundColor: 'transparent',
@@ -529,19 +521,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Calcola indice annotazione sul asse X
-        const annotationIndex = !isRepsVsWeight
-            ? Math.max(0, Math.min(labels.length - 1, reps - 1))
-            : (function() {
-                if (!labels.length) return 0;
-                let idx = 0;
-                let best = Infinity;
-                for (let i = 0; i < labels.length; i++) {
-                    const diff = Math.abs(labels[i] - weight);
-                    if (diff < best) { best = diff; idx = i; }
-                }
-                return idx;
-            })();
+        // Calcola indice annotazione sull'asse X (sempre basato sulle ripetizioni)
+        const annotationIndex = Math.max(0, Math.min(labels.length - 1, reps - 1));
 
         if (rmChart) {
             rmChart.destroy();
@@ -572,8 +553,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: true,
                         text: isRepsVsWeight
-                            ? 'Fissato il peso -> Range Reps'
-                            : 'Fissate le reps -> Range Peso',
+                            ? 'Fissate le reps -> Range Peso'
+                            : 'Fissato il peso -> Range Reps',
                         font: {
                             size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
@@ -634,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             items.sort((a, b) => b.parsed.y - a.parsed.y);
 
                             const xLabel = items.length ? items[0].label : '';
-                            const titleText = isRepsVsWeight ? `${xLabel} kg` : `${xLabel} reps`;
+                            const titleText = `${xLabel} reps`;
 
                             // Costruzione HTML: titolo e righe dei dataset
                             let innerHtml = '';
@@ -642,11 +623,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             for (const item of items) {
                                 const datasetLabel = item.dataset && item.dataset.label ? item.dataset.label : '';
-                                const bold = /hevy|project invictus/i.test(datasetLabel);
+                                const bold = /hevy|Proj Invictus/i.test(datasetLabel);
                                 const labelHtml = bold ? `<strong>${datasetLabel}</strong>` : datasetLabel;
-                                const valueHtml = isRepsVsWeight
-                                    ? `${item.parsed.y.toFixed(0)}`
-                                    : `${item.parsed.y.toFixed(1)} kg`;
+                                const valueHtml = `${item.parsed.y.toFixed(1)} kg`;
                                 innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
                             }
 
@@ -670,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 borderDash: [5, 5],
                                 label: {
                                     display: true,
-                                    content: isRepsVsWeight ? `${weight.toFixed(1)} kg` : `${reps} reps`,
+                                    content: `${reps} reps`,
                                     position: 'start',
                                     backgroundColor: 'rgba(100, 116, 139, 0.8)',
                                     color: '#fff',
@@ -688,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     x: {
                         title: {
                             display: true,
-                            text: isRepsVsWeight ? 'Peso (kg)' : 'Ripetizioni',
+                            text: 'Ripetizioni',
                             font: {
                                 family: "'Outfit', sans-serif",
                                 weight: 600
@@ -705,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     y: {
                         title: {
                             display: true,
-                            text: isRepsVsWeight ? 'Ripetizioni' : '1RM Stimato (kg)',
+                            text: isRepsVsWeight ? 'Peso (kg)' : '1RM Stimato (kg)',
                             font: {
                                 family: "'Outfit', sans-serif",
                                 weight: 600
@@ -770,8 +749,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchChartBtn.addEventListener('click', function() {
             currentChartMode = currentChartMode === 'oneRmVsReps' ? 'repsVsWeight' : 'oneRmVsReps';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Passa a Fissato il peso -> Range Reps'
-                : 'Passa a Fissate le reps -> Range Peso';
+                ? 'Fissato il peso -> Range Reps'
+                : 'Fissate le reps -> Range Peso';
             if (chartContainer.style.display !== 'none' && lastWeight != null && lastReps != null) {
                 updateChart(lastWeight, lastReps);
             }
