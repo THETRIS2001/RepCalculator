@@ -1,12 +1,12 @@
 const CACHE_NAME = '1rm-calculator-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/manifest.json',
-  '/icon-192.svg',
-  '/icon-512.svg'
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg'
 ];
 
 // Installazione Service Worker
