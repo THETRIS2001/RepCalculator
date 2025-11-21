@@ -1151,8 +1151,20 @@ h2 {
     }
 }
 
-/* iOS specific styles */
+/* iOS specific styles - FORZA LAYOUT */
 @supports (-webkit-touch-callout: none) {
+    /* Forza 2 colonne su iPhone grandi */
+    @media screen and (min-width: 414px) {
+        .grid-results {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 15px !important;
+        }
+        
+        .chart-container-card {
+            height: 750px !important;
+            min-height: 750px !important;
+        }
+    }
     body {
         min-height: -webkit-fill-available;
         padding-bottom: env(safe-area-inset-bottom);
@@ -1197,24 +1209,58 @@ h2 {
     }
 } */
 
-/* iPhone 14 Pro Max specific */
+/* Tutti gli iPhone grandi - iPhone Plus/Pro Max */
+@media only screen 
+  and (min-device-width: 414px) 
+  and (max-device-width: 430px) 
+  and (-webkit-device-pixel-ratio: 3) {
+    
+    .chart-container-card {
+        height: 750px !important;
+        padding: 20px !important;
+        min-height: 750px !important;
+    }
+    
+    .grid-results {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+        display: grid !important;
+    }
+    
+    .result-card {
+        padding: 18px !important;
+    }
+    
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* iPhone 14 Pro Max specific - FORZA STILI */
 @media only screen 
   and (device-width: 430px) 
   and (device-height: 932px) 
   and (-webkit-device-pixel-ratio: 3) {
     
     .chart-container-card {
-        height: 800px;
-        padding: 20px;
+        height: 800px !important;
+        padding: 20px !important;
+        min-height: 800px !important;
     }
     
     .grid-results {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+        display: grid !important;
     }
     
     .result-card {
-        padding: 18px;
+        padding: 18px !important;
+    }
+    
+    /* Forza il layout a 2 colonne anche per container più piccoli */
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
     
     .result-card .formula-name {
