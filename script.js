@@ -20,6 +20,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const repTableBody = document.getElementById('rep-table-body');
     const formulaSelect = document.getElementById('formula-select');
 
+    // Mobile: sposta il pulsante Mostra/Nascondi sotto la media stimata
+    const toggleChartBtnEl = document.getElementById('toggle-chart-btn');
+    const averageCardEl = document.querySelector('.average-card');
+    const chartContainerEl = document.getElementById('chart-container');
+    if (toggleChartBtnEl && averageCardEl && chartContainerEl && window.innerWidth <= 600) {
+        averageCardEl.insertAdjacentElement('afterend', toggleChartBtnEl);
+        // Lo manteniamo nascosto finché non si calcola
+        toggleChartBtnEl.style.display = 'none';
+        toggleChartBtnEl.style.width = '100%';
+        toggleChartBtnEl.style.marginTop = '8px';
+    }
+
     // Percentage tables for hevy and Project Invictus
     const hevyPercentages = [100, 97, 94, 92, 89, 86, 83, 81, 78, 75, 73, 71, 70, 68, 67, 65, 64, 63, 61, 60];
     const projectInvictusPercentages = [100, 95, 92, 89, 86, 83, 81, 79, 77, 75, 73, 71, 70, 68, 67, 65, 64, 63, 62, 61];
@@ -433,6 +445,14 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0
+                    }
+                },
                 interaction: {
                     mode: 'index',
                     intersect: false,
@@ -447,10 +467,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             weight: 600
                         },
                         color: '#0f172a',
-                        padding: window.innerWidth < 768 ? 10 : 20
+                        padding: window.innerWidth < 768 ? 16 : 20
                     },
                     legend: {
                         position: 'bottom',
+                        fullSize: false,
+                        padding: window.innerWidth < 768 ? 4 : 10,
                         title: {
                             display: true,
                             padding: window.innerWidth < 768 ? 10 : 20
@@ -569,7 +591,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (toggleChartBtn && chartContainer) {
         toggleChartBtn.addEventListener('click', function() {
             if (chartContainer.style.display === 'none') {
-                chartContainer.style.display = 'block';
+                // Su mobile usiamo flex per rispettare il layout
+                const isMobile = window.innerWidth <= 600;
+                chartContainer.style.display = isMobile ? 'flex' : 'block';
                 toggleChartBtn.textContent = 'Nascondi Grafico';
                 toggleChartBtn.classList.add('active');
             } else {
@@ -586,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 rmChart.resize();
                 rmChart.options.plugins.title.font.size = window.innerWidth < 768 ? 14 : 16;
-                rmChart.options.plugins.title.padding = window.innerWidth < 768 ? 10 : 20;
+                rmChart.options.plugins.title.padding = window.innerWidth < 768 ? 16 : 20;
                 rmChart.options.plugins.legend.labels.font.size = window.innerWidth < 768 ? 10 : 11;
                 rmChart.options.plugins.legend.labels.boxWidth = window.innerWidth < 768 ? 6 : 8;
                 rmChart.options.plugins.legend.title.padding = window.innerWidth < 768 ? 10 : 20;
