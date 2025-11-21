@@ -438,25 +438,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         display: true,
                         text: 'Confronto Formule: 1RM Stimato vs Ripetizioni (a parità di peso)',
                         font: {
-                            size: 16,
+                            size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
                             weight: 600
                         },
                         color: '#0f172a',
-                        padding: 20
+                        padding: window.innerWidth < 768 ? 10 : 20
                     },
                     legend: {
                         position: 'bottom',
                         title: {
                             display: true,
-                            padding: 20
+                            padding: window.innerWidth < 768 ? 10 : 20
                         },
                         labels: {
                             usePointStyle: true,
-                            boxWidth: 8,
+                            boxWidth: window.innerWidth < 768 ? 6 : 8,
                             font: {
                                 family: "'Outfit', sans-serif",
-                                size: 11
+                                size: window.innerWidth < 768 ? 10 : 11
                             }
                         }
                     },
@@ -575,4 +575,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Gestione resize per Chart.js su mobile
+    window.addEventListener('resize', function() {
+        if (rmChart) {
+            setTimeout(() => {
+                rmChart.resize();
+                rmChart.options.plugins.title.font.size = window.innerWidth < 768 ? 14 : 16;
+                rmChart.options.plugins.title.padding = window.innerWidth < 768 ? 10 : 20;
+                rmChart.options.plugins.legend.labels.font.size = window.innerWidth < 768 ? 10 : 11;
+                rmChart.options.plugins.legend.labels.boxWidth = window.innerWidth < 768 ? 6 : 8;
+                rmChart.options.plugins.legend.title.padding = window.innerWidth < 768 ? 10 : 20;
+                rmChart.update('none');
+            }, 100);
+        }
+    });
 });
