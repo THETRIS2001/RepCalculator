@@ -174,7 +174,7 @@ button#calculate-btn:active {
     font-weight: 600;
     font-size: 0.9rem;
     opacity: 0.8;
-    margin-bottom: 12px; /* Spazio sotto il pulsante anche su desktop */
+    margin-bottom: 12px; /* Spazio sotto il pulsante */
     display: none; /* Nascosto di default, mostrato dopo il calcolo */
 }
 
@@ -415,6 +415,27 @@ h2 {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Layout dei pulsanti grafico: desktop affiancati, mobile impilati */
+@media screen and (min-width: 601px) {
+    .toggle-chart-btn,
+    .switch-chart-btn {
+        display: inline-block;
+        width: calc(50% - 6px);
+        vertical-align: top;
+        text-align: center;
+    }
+    .switch-chart-btn {
+        margin-left: 12px;
+        margin-top: 0;
+    }
+}
+@media screen and (max-width: 600px) {
+    .switch-chart-btn {
+        margin-top: 8px;
+        margin-left: 0;
     }
 }
 

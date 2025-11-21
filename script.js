@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Percentage tables for hevy and Project Invictus
+    // Percentage tables for hevy and Proj Invictus
     const hevyPercentages = [100, 97, 94, 92, 89, 86, 83, 81, 78, 75, 73, 71, 70, 68, 67, 65, 64, 63, 61, 60];
     const projectInvictusPercentages = [100, 95, 92, 89, 86, 83, 81, 79, 77, 75, 73, 71, 70, 68, 67, 65, 64, 63, 62, 61];
 
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         {
-            name: 'Project Invictus',
+            name: 'Proj Invictus',
             isPrimary: true,
             calculate: (w, r) => {
                 if (r < 1 || r > 20) return 0;
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         {
-            name: 'Project Invictus',
+            name: 'Proj Invictus',
             isPrimary: true,
             calculateWeight: (oneRm, r) => {
                 if (r < 1 || r > 20) return 0;
@@ -348,8 +348,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (switchChartBtn) {
             switchChartBtn.style.display = 'none';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Grafico: Ripetizioni vs Peso'
-                : 'Grafico: 1RM vs Ripetizioni';
+                ? 'Passa a Fissato il peso → Range Reps'
+                : 'Passa a Fissate le reps → Range Peso';
         }
 
         if (manualOneRmInput) {
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return {
                     label: ' ' + formula.name,
                     data: data,
-                    borderColor: isPrimaryHevy ? '#f97316' : '#3b82f6', // hevy = orange, Project Invictus = blue
+                    borderColor: isPrimaryHevy ? '#f97316' : '#3b82f6', // hevy = orange, Proj Invictus = blue
                     backgroundColor: isPrimaryHevy ? 'rgba(249, 115, 22, 0.1)' : 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 3,
                     tension: 0.4,
@@ -564,8 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: true,
                         text: isRepsVsWeight
-                            ? 'Fissato il peso -> Range Reps'
-                            : 'Fissate le reps -> Range Peso',
+                            ? 'Fissato il peso → Range Reps'
+                            : 'Fissate le reps → Range Peso',
                         font: {
                             size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
@@ -592,34 +592,63 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        titleColor: '#0f172a',
-                        bodyColor: '#64748b',
-                        borderColor: '#e2e8f0',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 4,
-                        usePointStyle: true,
-                        itemSort: function (a, b) {
-                            // Sort descending (highest value first)
-                            return b.parsed.y - a.parsed.y;
-                        },
-                        callbacks: {
-                            title: function (items) {
-                                if (!items || !items.length) return '';
-                                const xLabel = items[0].label;
-                                return isRepsVsWeight ? `${xLabel} kg` : `${xLabel} reps`;
-                            },
-                            label: function (context) {
-                                // Mostra solo il valore Y con unità corrette (senza ripetere X in ogni riga)
-                                if (isRepsVsWeight) {
-                                    // Modalità: X = kg (titolo mostra "kg"), Y = reps (solo numero)
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(0)}`;
-                                } else {
-                                    // Modalità: X = reps (titolo mostra "reps"), Y = kg
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kg`;
-                                }
+                        enabled: false,
+                        external: function (context) {
+                            const { chart, tooltip } = context;
+                            let tooltipEl = chart.canvas.parentNode.querySelector('.chartjs-tooltip');
+
+                            // Crea l'elemento tooltip se non esiste
+                            if (!tooltipEl) {
+                                tooltipEl = document.createElement('div');
+                                tooltipEl.className = 'chartjs-tooltip';
+                                tooltipEl.style.pointerEvents = 'none';
+                                tooltipEl.style.position = 'absolute';
+                                tooltipEl.style.transform = 'translate(-50%, 0)';
+                                tooltipEl.style.transition = 'all .1s ease';
+                                tooltipEl.style.background = 'rgba(255, 255, 255, 0.95)';
+                                tooltipEl.style.border = '1px solid #e2e8f0';
+                                tooltipEl.style.borderRadius = '8px';
+                                tooltipEl.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.08)';
+                                tooltipEl.style.padding = '12px';
+                                tooltipEl.style.zIndex = '999';
+                                tooltipEl.style.fontFamily = "'Outfit', sans-serif";
+                                chart.canvas.parentNode.appendChild(tooltipEl);
                             }
+
+                            // Nasconde il tooltip quando non visibile
+                            if (!tooltip || tooltip.opacity === 0) {
+                                tooltipEl.style.opacity = '0';
+                                return;
+                            }
+
+                            // Prepara contenuti
+                            const items = tooltip.dataPoints ? tooltip.dataPoints.slice() : [];
+                            items.sort((a, b) => b.parsed.y - a.parsed.y);
+
+                            const xLabel = items.length ? items[0].label : '';
+                            const titleText = isRepsVsWeight ? `${xLabel} kg` : `${xLabel} reps`;
+
+                            // Costruzione HTML: titolo e righe dei dataset
+                            let innerHtml = '';
+                            innerHtml += `<div style="color:#0f172a;font-weight:600;font-size:${window.innerWidth < 768 ? 14 : 16}px;margin-bottom:8px;">${titleText}</div>`;
+
+                            for (const item of items) {
+                                const datasetLabel = item.dataset && item.dataset.label ? item.dataset.label : '';
+                                const bold = /hevy|project invictus/i.test(datasetLabel);
+                                const labelHtml = bold ? `<strong>${datasetLabel}</strong>` : datasetLabel;
+                                const valueHtml = isRepsVsWeight
+                                    ? `${item.parsed.y.toFixed(0)}`
+                                    : `${item.parsed.y.toFixed(1)} kg`;
+                                innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
+                            }
+
+                            tooltipEl.innerHTML = innerHtml;
+
+                            // Posizionamento vicino al cursore
+                            const { offsetLeft, offsetTop } = chart.canvas;
+                            tooltipEl.style.opacity = '1';
+                            tooltipEl.style.left = offsetLeft + tooltip.caretX + 'px';
+                            tooltipEl.style.top = offsetTop + tooltip.caretY + 12 + 'px';
                         }
                     },
                     annotation: {
@@ -733,8 +762,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchChartBtn.addEventListener('click', function() {
             currentChartMode = currentChartMode === 'oneRmVsReps' ? 'repsVsWeight' : 'oneRmVsReps';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Grafico: Ripetizioni vs Peso'
-                : 'Grafico: 1RM vs Ripetizioni';
+                ? 'Passa a Fissato il peso → Range Reps'
+                : 'Passa a Fissate le reps → Range Peso';
             if (chartContainer.style.display !== 'none' && lastWeight != null && lastReps != null) {
                 updateChart(lastWeight, lastReps);
             }
@@ -753,6 +782,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 rmChart.options.plugins.legend.title.padding = window.innerWidth < 768 ? 10 : 20;
                 rmChart.update('none');
             }, 100);
+        }
+
+        // Aggiorna layout pulsanti su resize (desktop affiancati, mobile impilati)
+        const tBtn = document.getElementById('toggle-chart-btn');
+        const sBtn = document.getElementById('switch-chart-btn');
+        const isMobile = window.innerWidth <= 600;
+        if (tBtn && sBtn) {
+            if (isMobile) {
+                tBtn.style.width = '100%';
+                sBtn.style.width = '100%';
+                sBtn.style.marginTop = '8px';
+            } else {
+                tBtn.style.width = '';
+                sBtn.style.width = '';
+                sBtn.style.marginTop = '';
+            }
         }
     });
 });
