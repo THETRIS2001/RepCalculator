@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mobile: sposta il pulsante Mostra/Nascondi sotto la media stimata
     const toggleChartBtnEl = document.getElementById('toggle-chart-btn');
+    const switchChartBtnEl = document.getElementById('switch-chart-btn');
     const averageCardEl = document.querySelector('.average-card');
     const chartContainerEl = document.getElementById('chart-container');
     if (toggleChartBtnEl && averageCardEl && chartContainerEl && window.innerWidth <= 600) {
@@ -30,6 +31,14 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleChartBtnEl.style.display = 'none';
         toggleChartBtnEl.style.width = '100%';
         toggleChartBtnEl.style.marginTop = '8px';
+    }
+
+    // Mobile: posiziona anche il pulsante di switch sotto la media
+    if (switchChartBtnEl && averageCardEl && chartContainerEl && window.innerWidth <= 600) {
+        averageCardEl.insertAdjacentElement('afterend', switchChartBtnEl);
+        switchChartBtnEl.style.display = 'none';
+        switchChartBtnEl.style.width = '100%';
+        switchChartBtnEl.style.marginTop = '8px';
     }
 
     // Percentage tables for hevy and Project Invictus
@@ -315,13 +324,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         resultsSection.style.display = 'block';
 
-        // Update Chart
+        // Memorizza ultimi valori e media
+        lastWeight = weight;
+        lastReps = reps;
+        latestAverageOneRm = average;
+
+        // Update Chart (modalità corrente)
         updateChart(weight, reps);
         
-        // Mostra il pulsante toggle solo dopo aver creato il grafico
+        // Mostra i pulsanti solo dopo aver creato il grafico
         const toggleChartBtn = document.getElementById('toggle-chart-btn');
+        const switchChartBtn = document.getElementById('switch-chart-btn');
         if (toggleChartBtn) {
             toggleChartBtn.style.display = 'inline-block';
+            toggleChartBtn.textContent = 'Mostra Grafico';
+            toggleChartBtn.classList.remove('active');
+        }
+        if (switchChartBtn) {
+            switchChartBtn.style.display = 'none';
+            switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
+                ? 'Grafico: Ripetizioni vs Peso'
+                : 'Grafico: 1RM vs Ripetizioni';
         }
 
         if (manualOneRmInput) {
@@ -388,15 +411,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let rmChart = null;
+    let currentChartMode = 'oneRmVsReps'; // 'repsVsWeight' per il secondo grafico
+    let lastWeight = null;
+    let lastReps = null;
+    let latestAverageOneRm = null;
 
     function updateChart(weight, reps) {
         const ctx = document.getElementById('rm-chart').getContext('2d');
+        const isRepsVsWeight = currentChartMode === 'repsVsWeight';
 
-        // Generate labels (1 to 20 reps)
-        const labels = Array.from({ length: 20 }, (_, i) => i + 1);
+        // Generate labels (1 to 20 reps) di default
+        let labels = Array.from({ length: 20 }, (_, i) => i + 1);
 
-        // Generate datasets for each formula
-        const datasets = formulas.map((formula, index) => {
+        // Generate datasets per ogni formula (modalità 1RM vs Ripetizioni)
+        let datasets = formulas.map((formula, index) => {
             const data = labels.map(r => formula.calculate(weight, r));
 
             // Primary formulas get special styling with different colors
@@ -432,6 +460,76 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         });
 
+        // Modalità alternativa: X = Peso (kg), Y = Ripetizioni (a 1RM medio)
+        if (isRepsVsWeight) {
+            const targetOneRm = latestAverageOneRm != null ? latestAverageOneRm : formulas.reduce((acc, f) => acc + f.calculate(weight, reps), 0) / formulas.length;
+
+            const minWeight = Math.max(0, Math.floor(weight * 0.5));
+            const maxWeight = Math.max(weight + 20, Math.ceil(weight * 1.3));
+            const step = 2;
+            labels = [];
+            for (let w = minWeight; w <= maxWeight; w += step) labels.push(w);
+
+            const predictRepsForWeight = (formula, w, target) => {
+                let bestR = 1;
+                let bestDiff = Infinity;
+                for (let r = 1; r <= 20; r++) {
+                    const est = formula.calculate(w, r);
+                    const diff = Math.abs(est - target);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestR = r;
+                    }
+                }
+                return bestR;
+            };
+
+            datasets = formulas.map((formula, index) => {
+                const data = labels.map(w => predictRepsForWeight(formula, w, targetOneRm));
+                if (formula.isPrimary) {
+                    const isPrimaryHevy = formula.name === 'hevy';
+                    return {
+                        label: ' ' + formula.name,
+                        data: data,
+                        borderColor: isPrimaryHevy ? '#f97316' : '#3b82f6',
+                        backgroundColor: isPrimaryHevy ? 'rgba(249, 115, 22, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 8,
+                        order: 0
+                    };
+                }
+                const hue = (index * 360 / formulas.length) % 360;
+                const borderColor = `hsla(${hue}, 70%, 50%, 1)`;
+                return {
+                    label: ' ' + formula.name,
+                    data: data,
+                    borderColor: borderColor,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    order: 1
+                };
+            });
+        }
+
+        // Calcola indice annotazione sul asse X
+        const annotationIndex = !isRepsVsWeight
+            ? Math.max(0, Math.min(labels.length - 1, reps - 1))
+            : (function() {
+                if (!labels.length) return 0;
+                let idx = 0;
+                let best = Infinity;
+                for (let i = 0; i < labels.length; i++) {
+                    const diff = Math.abs(labels[i] - weight);
+                    if (diff < best) { best = diff; idx = i; }
+                }
+                return idx;
+            })();
+
         if (rmChart) {
             rmChart.destroy();
         }
@@ -460,7 +558,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Confronto Formule: 1RM Stimato vs Ripetizioni (a parità di peso)',
+                        text: isRepsVsWeight
+                            ? 'Confronto Formule: Ripetizioni stimate vs Peso (a parità di 1RM)'
+                            : 'Confronto Formule: 1RM Stimato vs Ripetizioni (a parità di peso)',
                         font: {
                             size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
@@ -501,7 +601,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         callbacks: {
                             label: function (context) {
-                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kg`;
+                                return isRepsVsWeight
+                                    ? `${context.dataset.label}: ${context.parsed.y.toFixed(0)} reps`
+                                    : `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kg`;
                             }
                         }
                     },
@@ -510,13 +612,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             line1: {
                                 type: 'line',
                                 scaleID: 'x',
-                                value: reps - 1,
+                                value: annotationIndex,
                                 borderColor: 'rgba(100, 116, 139, 0.5)',
                                 borderWidth: 2,
                                 borderDash: [5, 5],
                                 label: {
                                     display: true,
-                                    content: `${reps} reps`,
+                                    content: isRepsVsWeight ? `${weight.toFixed(1)} kg` : `${reps} reps`,
                                     position: 'start',
                                     backgroundColor: 'rgba(100, 116, 139, 0.8)',
                                     color: '#fff',
@@ -534,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     x: {
                         title: {
                             display: true,
-                            text: 'Ripetizioni',
+                            text: isRepsVsWeight ? 'Peso (kg)' : 'Ripetizioni',
                             font: {
                                 family: "'Outfit', sans-serif",
                                 weight: 600
@@ -551,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     y: {
                         title: {
                             display: true,
-                            text: '1RM Stimato (kg)',
+                            text: isRepsVsWeight ? 'Ripetizioni' : '1RM Stimato (kg)',
                             font: {
                                 family: "'Outfit', sans-serif",
                                 weight: 600
@@ -587,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gestore per il pulsante toggle del grafico
     const toggleChartBtn = document.getElementById('toggle-chart-btn');
     const chartContainer = document.getElementById('chart-container');
+    const switchChartBtn = document.getElementById('switch-chart-btn');
     
     if (toggleChartBtn && chartContainer) {
         toggleChartBtn.addEventListener('click', function() {
@@ -596,10 +699,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 chartContainer.style.display = isMobile ? 'flex' : 'block';
                 toggleChartBtn.textContent = 'Nascondi Grafico';
                 toggleChartBtn.classList.add('active');
+                if (switchChartBtn) {
+                    switchChartBtn.style.display = 'inline-block';
+                }
             } else {
                 chartContainer.style.display = 'none';
                 toggleChartBtn.textContent = 'Mostra Grafico';
                 toggleChartBtn.classList.remove('active');
+                if (switchChartBtn) {
+                    switchChartBtn.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Gestore del pulsante di switch modalità grafico
+    if (switchChartBtn && chartContainer) {
+        switchChartBtn.addEventListener('click', function() {
+            currentChartMode = currentChartMode === 'oneRmVsReps' ? 'repsVsWeight' : 'oneRmVsReps';
+            switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
+                ? 'Grafico: Ripetizioni vs Peso'
+                : 'Grafico: 1RM vs Ripetizioni';
+            if (chartContainer.style.display !== 'none' && lastWeight != null && lastReps != null) {
+                updateChart(lastWeight, lastReps);
             }
         });
     }

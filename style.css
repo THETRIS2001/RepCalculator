@@ -162,7 +162,7 @@ button#calculate-btn:active {
     margin-bottom: 0;
 }
 
-.toggle-chart-btn {
+.toggle-chart-btn, .switch-chart-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
@@ -178,13 +178,13 @@ button#calculate-btn:active {
     display: none; /* Nascosto di default, mostrato dopo il calcolo */
 }
 
-.toggle-chart-btn:hover {
+.toggle-chart-btn:hover, .switch-chart-btn:hover {
     color: var(--text-primary);
     background: var(--input-bg);
     opacity: 1;
 }
 
-.toggle-chart-btn.active {
+.toggle-chart-btn.active, .switch-chart-btn.active {
     background: white;
     color: var(--accent-primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -1078,7 +1078,7 @@ h2 {
         margin-bottom: 20px;
     }
     
-    .toggle-chart-btn {
+    .toggle-chart-btn, .switch-chart-btn {
         width: 100%;
         text-align: center;
         font-size: 1.1rem;
