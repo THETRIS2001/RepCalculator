@@ -36,8 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (switchChartBtnEl && averageCardEl && chartContainerEl) {
+    // Assicura che "Mostra/Nascondi" venga sempre PRIMA di "Switch"
+    if (switchChartBtnEl && toggleChartBtnEl && averageCardEl && chartContainerEl) {
+        // Inserisci lo switch immediatamente DOPO il toggle, mantenendo l'ordine stabile
+        toggleChartBtnEl.insertAdjacentElement('afterend', switchChartBtnEl);
+    } else if (switchChartBtnEl && averageCardEl && chartContainerEl) {
+        // Fallback: se toggle non è disponibile, inserisci dopo la card
         averageCardEl.insertAdjacentElement('afterend', switchChartBtnEl);
+    }
+    // Nascondi lo switch finché non si mostra il grafico
+    if (switchChartBtnEl) {
         switchChartBtnEl.style.display = 'none';
         // Larghezza piena solo su mobile
         if (window.innerWidth <= 600) {
@@ -348,8 +356,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (switchChartBtn) {
             switchChartBtn.style.display = 'none';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Passa a Fissato il peso → Range Reps'
-                : 'Passa a Fissate le reps → Range Peso';
+                ? 'Passa a Fissato il peso -> Range Reps'
+                : 'Passa a Fissate le reps -> Range Peso';
         }
 
         if (manualOneRmInput) {
@@ -564,8 +572,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: true,
                         text: isRepsVsWeight
-                            ? 'Fissato il peso → Range Reps'
-                            : 'Fissate le reps → Range Peso',
+                            ? 'Fissato il peso -> Range Reps'
+                            : 'Fissate le reps -> Range Peso',
                         font: {
                             size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
@@ -762,8 +770,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switchChartBtn.addEventListener('click', function() {
             currentChartMode = currentChartMode === 'oneRmVsReps' ? 'repsVsWeight' : 'oneRmVsReps';
             switchChartBtn.textContent = currentChartMode === 'oneRmVsReps'
-                ? 'Passa a Fissato il peso → Range Reps'
-                : 'Passa a Fissate le reps → Range Peso';
+                ? 'Passa a Fissato il peso -> Range Reps'
+                : 'Passa a Fissate le reps -> Range Peso';
             if (chartContainer.style.display !== 'none' && lastWeight != null && lastReps != null) {
                 updateChart(lastWeight, lastReps);
             }
