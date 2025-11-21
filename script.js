@@ -488,7 +488,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Modalità alternativa: X = Peso (kg), Y = Ripetizioni (a 1RM medio)
         if (isRepsVsWeight) {
-            const targetOneRm = latestAverageOneRm != null ? latestAverageOneRm : formulas.reduce((acc, f) => acc + f.calculate(weight, reps), 0) / formulas.length;
+            // Usa un target 1RM specifico per ogni formula, calcolato dai valori inseriti
+            const targetsPerFormula = formulas.map(f => f.calculate(weight, reps));
 
             // Definisci un range di ricerca ampio e trova le soglie dinamiche:
             // - inizio: primo peso dove almeno una formula dà reps < 20
@@ -516,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let wRightCandidate = null;
 
             for (let w = baseMin; w <= baseMax; w += step) {
-                const repsForW = formulas.map(formula => predictRepsForWeight(formula, w, targetOneRm));
+                const repsForW = formulas.map((formula, idx) => predictRepsForWeight(formula, w, targetsPerFormula[idx]));
                 if (wLeftCandidate === null && repsForW.some(r => r < 20)) {
                     wLeftCandidate = w;
                 }
@@ -546,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
 
             datasets = formulas.map((formula, index) => {
-                const data = labels.map(w => predictRepsForWeight(formula, w, targetOneRm));
+                const data = labels.map(w => predictRepsForWeight(formula, w, targetsPerFormula[index]));
                 if (formula.isPrimary) {
                     const isPrimaryHevy = formula.name === 'hevy';
                     return {
