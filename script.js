@@ -306,7 +306,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update Chart
         updateChart(weight, reps);
         
-        // Il grafico rimane nascosto - l'utente deve cliccare "Mostra Grafico" per vederlo
+        // Mostra il pulsante toggle solo dopo aver creato il grafico
+        const toggleChartBtn = document.getElementById('toggle-chart-btn');
+        if (toggleChartBtn) {
+            toggleChartBtn.style.display = 'inline-block';
+        }
 
         if (manualOneRmInput) {
             manualOneRmInput.value = average.toFixed(1);
