@@ -1,4 +1,4 @@
-const CACHE_NAME = '1rm-calculator-v2';
+const CACHE_NAME = '1rm-calculator-v3';
 const urlsToCache = [
   './',
   './index.html',
