@@ -511,7 +511,7 @@ h2 {
     }
     
     .grid-results {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
     
@@ -1146,7 +1146,7 @@ h2 {
     }
     
     .chart-container-card {
-        height: 400px;
+        height: 600px;
         padding: 15px;
     }
 }
