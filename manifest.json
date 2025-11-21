@@ -2,7 +2,7 @@
   "name": "Calcolatore 1RM - Massimale",
   "short_name": "1RM Calc",
   "description": "Calcola il tuo massimale con 16 formule scientifiche",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
@@ -20,7 +20,7 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ],"explanation":"Correggo i percorsi delle icone da PNG a SVG"}
+  ],
   "categories": ["health", "fitness", "utilities"],
   "lang": "it",
   "dir": "ltr"
