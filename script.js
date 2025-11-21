@@ -682,7 +682,18 @@ document.addEventListener('DOMContentLoaded', function() {
                             items.sort((a, b) => b.parsed.y - a.parsed.y);
 
                             const xLabel = items.length ? items[0].label : '';
-                            const titleText = isRepsVsWeight ? `${xLabel} kg` : `${xLabel} reps`;
+                            const values = items.map(i => i.parsed.y);
+                            const hasValues = values.length > 0;
+                            const minVal = hasValues ? Math.min(...values) : null;
+                            const maxVal = hasValues ? Math.max(...values) : null;
+                            const intervalText = hasValues
+                                ? (isRepsVsWeight
+                                    ? `[${Math.round(minVal)} Reps - ${Math.round(maxVal)} Reps]`
+                                    : `[${minVal.toFixed(2)} Kg - ${maxVal.toFixed(2)} Kg]`)
+                                : '';
+                            const titleText = isRepsVsWeight
+                                ? `${xLabel} Kg ${intervalText}`
+                                : `${xLabel} Reps ${intervalText}`;
 
                             // Costruzione HTML: titolo e righe dei dataset
                             let innerHtml = '';
