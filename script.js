@@ -490,11 +490,43 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isRepsVsWeight) {
             const targetOneRm = latestAverageOneRm != null ? latestAverageOneRm : formulas.reduce((acc, f) => acc + f.calculate(weight, reps), 0) / formulas.length;
 
-            const minWeight = Math.max(0, Math.floor(weight * 0.5));
-            const maxWeight = Math.max(weight + 20, Math.ceil(weight * 1.3));
-            const step = 1; // mostra tutti i pesi in kg
+            // Definisci un range di ricerca ampio e trova le soglie dinamiche:
+            // - inizio: primo peso dove almeno una formula dà reps < 20
+            // - fine: primo peso dove tutte le formule danno reps = 1
+            const baseMin = Math.max(0, Math.floor(weight * 0.5));
+            const baseMax = Math.max(weight + 80, Math.ceil(weight * 1.8));
+            const step = 1;
+
+            let wLeftCandidate = null;
+            let wRightCandidate = null;
+
+            for (let w = baseMin; w <= baseMax; w += step) {
+                const repsForW = formulas.map(formula => predictRepsForWeight(formula, w, targetOneRm));
+                if (wLeftCandidate === null && repsForW.some(r => r < 20)) {
+                    wLeftCandidate = w;
+                }
+                if (wRightCandidate === null && repsForW.every(r => r === 1)) {
+                    wRightCandidate = w;
+                    // Non interrompiamo subito per garantire che wLeftCandidate sia calcolato,
+                    // ma se già noto, possiamo uscire.
+                    if (wLeftCandidate !== null) break;
+                }
+            }
+
+            const startWeight = wLeftCandidate != null
+                ? Math.max(0, Math.floor(wLeftCandidate * 0.95))
+                : baseMin;
+            const endWeight = wRightCandidate != null
+                ? Math.ceil(wRightCandidate * 1.05)
+                : baseMax;
+
             labels = [];
-            for (let w = minWeight; w <= maxWeight; w += step) labels.push(w);
+            if (endWeight > startWeight) {
+                for (let w = startWeight; w <= endWeight; w += step) labels.push(w);
+            } else {
+                // Fallback: usa il range base
+                for (let w = baseMin; w <= baseMax; w += step) labels.push(w);
+            }
 
             const predictRepsForWeight = (formula, w, target) => {
                 let bestR = 1;
