@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1RM Calculator">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+    <title>Calcolatore Massimale 1RM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Calcolatore 1RM</h1>
+            <p class="subtitle">Stima il tuo massimale con 16 formule scientifiche</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="input-group">
+                    <label for="weight">Peso Sollevato (kg)</label>
+                    <input type="number" id="weight" placeholder="Es. 100" min="0" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label for="reps">Ripetizioni</label>
+                    <input type="number" id="reps" placeholder="Es. 5" min="1" max="20">
+                </div>
+                <button id="calculate-btn">Calcola Massimale</button>
+            </section>
+
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="results-header">
+                    <h2>Risultati Stimati</h2>
+                    <button id="toggle-chart-btn" class="toggle-chart-btn">Mostra Grafico</button>
+                </div>
+                <div class="average-card">
+                    <h3>Media Stimata</h3>
+                    <div class="value" id="average-val">--</div>
+                    <div class="unit">kg</div>
+                </div>
+
+                <div class="chart-container-card" id="chart-container" style="display: none;">
+                    <canvas id="rm-chart"></canvas>
+                </div>
+
+                <div class="grid-results" id="results-grid">
+                    <!-- Results injected via JS -->
+                </div>
+
+                <!-- Rep Max Section -->
+                <div class="rep-max-section">
+                    <h2>Calcolo Ripetizioni</h2>
+                    <div class="rep-max-controls">
+                        <div class="input-group">
+                            <label for="manual-one-rm">Massimale (1RM)</label>
+                            <input type="number" id="manual-one-rm" placeholder="Inserisci massimale" min="0"
+                                step="0.5">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="formula-select">Formula</label>
+                            <select id="formula-select">
+                                <option value="average">Media (Consigliato)</option>
+                                <option value="hevy" class="primary-formula">hevy</option>
+                                <option value="Project Invictus" class="primary-formula">Project Invictus</option>
+                                <option value="Adams">Adams</option>
+                                <option value="Baechle">Baechle</option>
+                                <option value="Berger">Berger</option>
+                                <option value="Brown">Brown</option>
+                                <option value="Brzycki">Brzycki</option>
+                                <option value="Epley">Epley</option>
+                                <option value="Kemmler">Kemmler</option>
+                                <option value="Kellner">Kellner</option>
+                                <option value="McGlothin/Landers">McGlothin/Landers</option>
+                                <option value="Lombardi">Lombardi</option>
+                                <option value="Mayhew">Mayhew</option>
+                                <option value="Naclerio">Naclerio</option>
+                                <option value="O'Conner">O'Conner</option>
+                                <option value="Wathen">Wathen</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Arrotondamento</label>
+                            <div class="rounding-tabs">
+                                <button class="tab-btn active" data-mode="exact">Esatto</button>
+                                <button class="tab-btn" data-mode="barbell">Bilanciere (2.5kg)</button>
+                                <button class="tab-btn" data-mode="dumbbell">Manubri (2kg)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rep-table-container">
+                        <table class="rep-table">
+                            <thead>
+                                <tr>
+                                    <th>Reps</th>
+                                    <th>Peso Stimato</th>
+                                    <th>% 1RM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rep-table-body">
+                                <!-- Rows injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

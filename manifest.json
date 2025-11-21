@@ -1,0 +1,27 @@
+{
+  "name": "Calcolatore 1RM - Massimale",
+  "short_name": "1RM Calc",
+  "description": "Calcola il tuo massimale con 16 formule scientifiche",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "utilities"],
+  "lang": "it",
+  "dir": "ltr"
+}
