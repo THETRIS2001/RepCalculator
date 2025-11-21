@@ -20,25 +20,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const repTableBody = document.getElementById('rep-table-body');
     const formulaSelect = document.getElementById('formula-select');
 
-    // Mobile: sposta il pulsante Mostra/Nascondi sotto la media stimata
+    // Sposta i pulsanti grafico sotto la media stimata (mobile e desktop)
     const toggleChartBtnEl = document.getElementById('toggle-chart-btn');
     const switchChartBtnEl = document.getElementById('switch-chart-btn');
     const averageCardEl = document.querySelector('.average-card');
     const chartContainerEl = document.getElementById('chart-container');
-    if (toggleChartBtnEl && averageCardEl && chartContainerEl && window.innerWidth <= 600) {
+    if (toggleChartBtnEl && averageCardEl && chartContainerEl) {
         averageCardEl.insertAdjacentElement('afterend', toggleChartBtnEl);
         // Lo manteniamo nascosto finché non si calcola
         toggleChartBtnEl.style.display = 'none';
-        toggleChartBtnEl.style.width = '100%';
-        toggleChartBtnEl.style.marginTop = '8px';
+        // Larghezza piena solo su mobile
+        if (window.innerWidth <= 600) {
+            toggleChartBtnEl.style.width = '100%';
+            toggleChartBtnEl.style.marginTop = '8px';
+        }
     }
 
-    // Mobile: posiziona anche il pulsante di switch sotto la media
-    if (switchChartBtnEl && averageCardEl && chartContainerEl && window.innerWidth <= 600) {
+    if (switchChartBtnEl && averageCardEl && chartContainerEl) {
         averageCardEl.insertAdjacentElement('afterend', switchChartBtnEl);
         switchChartBtnEl.style.display = 'none';
-        switchChartBtnEl.style.width = '100%';
-        switchChartBtnEl.style.marginTop = '8px';
+        // Larghezza piena solo su mobile
+        if (window.innerWidth <= 600) {
+            switchChartBtnEl.style.width = '100%';
+            switchChartBtnEl.style.marginTop = '8px';
+        }
     }
 
     // Percentage tables for hevy and Project Invictus
@@ -559,8 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: true,
                         text: isRepsVsWeight
-                            ? 'Confronto Formule: Ripetizioni stimate vs Peso (a parità di 1RM)'
-                            : 'Confronto Formule: 1RM Stimato vs Ripetizioni (a parità di peso)',
+                            ? 'Fissato il peso -> Range Reps'
+                            : 'Fissate le reps -> Range Peso',
                         font: {
                             size: window.innerWidth < 768 ? 14 : 16,
                             family: "'Outfit', sans-serif",
@@ -600,10 +605,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             return b.parsed.y - a.parsed.y;
                         },
                         callbacks: {
+                            title: function (items) {
+                                if (!items || !items.length) return '';
+                                const xLabel = items[0].label;
+                                return isRepsVsWeight ? `${xLabel} kg` : `${xLabel} reps`;
+                            },
                             label: function (context) {
-                                return isRepsVsWeight
-                                    ? `${context.dataset.label}: ${context.parsed.y.toFixed(0)} reps`
-                                    : `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kg`;
+                                // Mostra solo il valore Y con unità corrette (senza ripetere X in ogni riga)
+                                if (isRepsVsWeight) {
+                                    // Modalità: X = kg (titolo mostra "kg"), Y = reps (solo numero)
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(0)}`;
+                                } else {
+                                    // Modalità: X = reps (titolo mostra "reps"), Y = kg
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} kg`;
+                                }
                             }
                         }
                     },
