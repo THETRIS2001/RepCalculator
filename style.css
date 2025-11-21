@@ -1115,7 +1115,7 @@ h2 {
     
     .rep-max-controls {
         flex-direction: column;
-        gap: 10px;
+        gap: 20px;
     }
     
     .rep-table th,
