@@ -686,14 +686,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             const hasValues = values.length > 0;
                             const minVal = hasValues ? Math.min(...values) : null;
                             const maxVal = hasValues ? Math.max(...values) : null;
-                            const roundToTen = (val) => Math.round(val / 10) * 10;
+                            const roundToTenth = (val) => Math.round(val * 10) / 10;
                             const intervalText = hasValues
                                 ? (isRepsVsWeight
                                     ? `[${Math.round(minVal)} Reps - ${Math.round(maxVal)} Reps]`
-                                    : `[${roundToTen(minVal)} Kg - ${roundToTen(maxVal)} Kg]`)
+                                    : `[${roundToTenth(minVal).toFixed(1)} Kg - ${roundToTenth(maxVal).toFixed(1)} Kg]`)
                                 : '';
                             const titleText = isRepsVsWeight
-                                ? `${roundToTen(Number(xLabel))} Kg ${intervalText}`
+                                ? `${roundToTenth(Number(xLabel)).toFixed(1)} Kg ${intervalText}`
                                 : `${xLabel} Reps ${intervalText}`;
 
                             // Costruzione HTML: titolo e righe dei dataset
@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const labelHtml = bold ? `<strong>${datasetLabel}</strong>` : datasetLabel;
                                 const valueHtml = isRepsVsWeight
                                     ? `${item.parsed.y.toFixed(0)}`
-                                    : `${Math.round(item.parsed.y / 10) * 10} Kg`;
+                                    : `${(Math.round(item.parsed.y * 10) / 10).toFixed(1)} Kg`;
                                 innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
                             }
 
