@@ -250,6 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
         expertModeBtn.addEventListener('click', () => {
             expertMode = !expertMode;
             expertModeBtn.classList.toggle('active', expertMode);
+            expertModeBtn.textContent = expertMode ? 'Versione Base' : 'Versione Esperti';
+            expertModeBtn.setAttribute('aria-pressed', String(expertMode));
             // Aggiorna select e tabelle
             populateFormulaSelect();
             updateRepTable();
@@ -259,6 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateChart(lastWeight, lastReps);
             }
         });
+        // Stato iniziale del testo/accessibilità
+        expertModeBtn.setAttribute('aria-pressed', 'false');
     }
 
     tabBtns.forEach(btn => {

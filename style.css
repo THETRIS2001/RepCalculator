@@ -1122,6 +1122,12 @@ h2 {
         margin-bottom: 12px;
         display: none; /* Nascosto su mobile finché non si calcola */
     }
+    .expert-mode-btn {
+        width: 100%;
+        text-align: center;
+        font-size: 1.1rem;
+        padding: 12px 20px;
+    }
     
     .average-card {
         padding: 20px;
