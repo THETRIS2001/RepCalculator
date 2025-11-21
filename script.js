@@ -686,13 +686,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             const hasValues = values.length > 0;
                             const minVal = hasValues ? Math.min(...values) : null;
                             const maxVal = hasValues ? Math.max(...values) : null;
+                            const roundToTen = (val) => Math.round(val / 10) * 10;
                             const intervalText = hasValues
                                 ? (isRepsVsWeight
                                     ? `[${Math.round(minVal)} Reps - ${Math.round(maxVal)} Reps]`
-                                    : `[${minVal.toFixed(2)} Kg - ${maxVal.toFixed(2)} Kg]`)
+                                    : `[${roundToTen(minVal)} Kg - ${roundToTen(maxVal)} Kg]`)
                                 : '';
                             const titleText = isRepsVsWeight
-                                ? `${xLabel} Kg ${intervalText}`
+                                ? `${roundToTen(Number(xLabel))} Kg ${intervalText}`
                                 : `${xLabel} Reps ${intervalText}`;
 
                             // Costruzione HTML: titolo e righe dei dataset
@@ -705,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const labelHtml = bold ? `<strong>${datasetLabel}</strong>` : datasetLabel;
                                 const valueHtml = isRepsVsWeight
                                     ? `${item.parsed.y.toFixed(0)}`
-                                    : `${item.parsed.y.toFixed(1)} kg`;
+                                    : `${Math.round(item.parsed.y / 10) * 10} Kg`;
                                 innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
                             }
 
