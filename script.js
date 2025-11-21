@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const minWeight = Math.max(0, Math.floor(weight * 0.5));
             const maxWeight = Math.max(weight + 20, Math.ceil(weight * 1.3));
-            const step = 2;
+            const step = 1; // mostra tutti i pesi in kg
             labels = [];
             for (let w = minWeight; w <= maxWeight; w += step) labels.push(w);
 
