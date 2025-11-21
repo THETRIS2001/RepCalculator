@@ -45,6 +45,22 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Network-first per richieste di navigazione (index.html / document)
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('/index.html')) {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, networkResponse.clone());
+        return networkResponse;
+      } catch (err) {
+        const cachedResponse = await caches.match(request);
+        return cachedResponse || new Response('', { status: 503, statusText: 'Offline' });
+      }
+    })());
+    return;
+  }
+
   // Network-first per CSS e JS per garantire aggiornamenti
   if (url.pathname.endsWith('/style.css') || url.pathname.endsWith('/script.js')) {
     event.respondWith((async () => {
