@@ -30,7 +30,7 @@ L'app verrà aggiunta alla schermata home come un'app nativa!
 ## Deploy su GitHub Pages
 
 1. **Fork** questo repository
-2. Vai su **Settings** → **Pages**
+2. Vai su **Settings** -> **Pages**
 3. Seleziona **Deploy from a branch**
 4. Scegli **main branch** e **/ (root)**
 5. Tocca **Save**

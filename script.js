@@ -345,6 +345,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update Chart (modalità corrente)
         updateChart(weight, reps);
         
+        // Nascondi il grafico dopo il ricalcolo e aggiorna i pulsanti
+        const chartContainerEl = document.getElementById('chart-container');
+        if (chartContainerEl) {
+            chartContainerEl.style.display = 'none';
+        }
+
         // Mostra i pulsanti solo dopo aver creato il grafico
         const toggleChartBtn = document.getElementById('toggle-chart-btn');
         const switchChartBtn = document.getElementById('switch-chart-btn');
