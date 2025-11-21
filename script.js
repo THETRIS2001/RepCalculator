@@ -497,6 +497,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const baseMax = Math.max(weight + 80, Math.ceil(weight * 1.8));
             const step = 1;
 
+            // Funzione hoistata per predire le ripetizioni dato un peso
+            function predictRepsForWeight(formula, w, target) {
+                let bestR = 1;
+                let bestDiff = Infinity;
+                for (let r = 1; r <= 20; r++) {
+                    const est = formula.calculate(w, r);
+                    const diff = Math.abs(est - target);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestR = r;
+                    }
+                }
+                return bestR;
+            }
+
             let wLeftCandidate = null;
             let wRightCandidate = null;
 
@@ -528,19 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 for (let w = baseMin; w <= baseMax; w += step) labels.push(w);
             }
 
-            const predictRepsForWeight = (formula, w, target) => {
-                let bestR = 1;
-                let bestDiff = Infinity;
-                for (let r = 1; r <= 20; r++) {
-                    const est = formula.calculate(w, r);
-                    const diff = Math.abs(est - target);
-                    if (diff < bestDiff) {
-                        bestDiff = diff;
-                        bestR = r;
-                    }
-                }
-                return bestR;
-            };
+            
 
             datasets = formulas.map((formula, index) => {
                 const data = labels.map(w => predictRepsForWeight(formula, w, targetOneRm));
