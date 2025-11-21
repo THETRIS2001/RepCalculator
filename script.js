@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     : `[${roundToTenth(minVal).toFixed(1)} Kg - ${roundToTenth(maxVal).toFixed(1)} Kg]`)
                                 : '';
                             const titleText = isRepsVsWeight
-                                ? `${roundToTenth(Number(xLabel)).toFixed(1)} Kg ${intervalText}`
+                                ? `${Math.round(Number(xLabel))} Kg ${intervalText}`
                                 : `${xLabel} Reps ${intervalText}`;
 
                             // Costruzione HTML: titolo e righe dei dataset
@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const bold = /hevy|Proj Invictus/i.test(datasetLabel);
                                 const labelHtml = bold ? `<strong>${datasetLabel}</strong>` : datasetLabel;
                                 const valueHtml = isRepsVsWeight
-                                    ? `${item.parsed.y.toFixed(0)}`
+                                    ? `${Math.round(item.parsed.y)} Reps`
                                     : `${(Math.round(item.parsed.y * 10) / 10).toFixed(1)} Kg`;
                                 innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
                             }
