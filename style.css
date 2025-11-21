@@ -502,16 +502,31 @@ h2 {
         padding: 0;
     }
     
-    .results-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .results-header h2 {
-        font-size: 1.4rem;
-    }
+.results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.results-header h2 {
+    font-size: 1.4rem;
+}
+
+.expert-mode-btn {
+    align-self: flex-end;
+    font-size: 1.1rem;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: white;
+    color: var(--accent-primary);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+}
+.expert-mode-btn.active {
+    background: var(--accent-primary);
+    color: white;
+}
     
     .toggle-chart-btn {
         align-self: flex-end;

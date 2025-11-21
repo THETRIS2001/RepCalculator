@@ -214,6 +214,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentRoundingMode = 'exact';
     const tabBtns = document.querySelectorAll('.tab-btn');
+    let expertMode = false;
+    const expertModeBtn = document.getElementById('expert-mode-btn');
+
+    function getActiveFormulas() {
+        return expertMode ? formulas : formulas.filter(f => f.isPrimary);
+    }
+    function getActiveInverseFormulas() {
+        return expertMode ? inverseFormulas : inverseFormulas.filter(f => f.isPrimary);
+    }
+
+    function populateFormulaSelect() {
+        if (!formulaSelect) return;
+        const previouslySelected = formulaSelect.value;
+        const active = getActiveInverseFormulas();
+        // Ricostruisci le opzioni: average + attive
+        formulaSelect.innerHTML = '';
+        const optAvg = document.createElement('option');
+        optAvg.value = 'average';
+        optAvg.textContent = 'Media (Consigliato)';
+        formulaSelect.appendChild(optAvg);
+        active.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.name;
+            opt.textContent = f.name;
+            if (f.isPrimary) opt.classList.add('primary-formula');
+            formulaSelect.appendChild(opt);
+        });
+        // Ripristina selezione se ancora valida, altrimenti fallback a average
+        const allowedValues = ['average', ...active.map(f => f.name)];
+        formulaSelect.value = allowedValues.includes(previouslySelected) ? previouslySelected : 'average';
+    }
+
+    if (expertModeBtn) {
+        expertModeBtn.addEventListener('click', () => {
+            expertMode = !expertMode;
+            expertModeBtn.classList.toggle('active', expertMode);
+            // Aggiorna select e tabelle
+            populateFormulaSelect();
+            updateRepTable();
+            // Se abbiamo già calcolato, rigenera riepilogo, media e grafico
+            if (lastWeight != null && lastReps != null) {
+                renderResultsAndAverage(lastWeight, lastReps);
+                updateChart(lastWeight, lastReps);
+            }
+        });
+    }
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -269,6 +315,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
 
+    function renderResultsAndAverage(weight, reps) {
+        const active = getActiveFormulas();
+        const results = active.map(formula => ({
+            name: formula.name,
+            value: formula.calculate(weight, reps),
+            isPrimary: formula.isPrimary || false
+        }));
+
+        results.sort((a, b) => b.value - a.value);
+        const average = results.reduce((sum, r) => sum + r.value, 0) / results.length;
+
+        if (resultsGrid) {
+            resultsGrid.innerHTML = results.map(r => `
+                <div class="result-card${r.isPrimary ? ' primary' : ''}" 
+                     data-value="${r.value.toFixed(1)}" 
+                     data-formula="${r.name}"
+                     style="cursor: pointer;">
+                    <div class="formula-name">${r.name}</div>
+                    <div class="formula-value">${r.value.toFixed(1)} kg</div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.result-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const value = this.dataset.value;
+                    const formulaName = this.dataset.formula;
+                    if (manualOneRmInput) manualOneRmInput.value = value;
+                    if (formulaSelect) formulaSelect.value = formulaName;
+                    updateRepTable();
+                    document.querySelectorAll('.result-card').forEach(c => c.style.borderColor = '');
+                    if (!this.classList.contains('primary')) {
+                        this.style.borderColor = 'var(--accent-primary)';
+                    }
+                });
+            });
+        }
+
+        animateValue(averageVal, 0, average, 1000);
+        resultsSection.style.display = 'block';
+
+        latestAverageOneRm = average;
+        if (manualOneRmInput) {
+            manualOneRmInput.value = average.toFixed(1);
+        }
+    }
+
     function calculateOneRM() {
         const weight = parseFloat(weightInput.value);
         const reps = parseInt(repsInput.value);
@@ -283,64 +375,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const results = formulas.map(formula => ({
-            name: formula.name,
-            value: formula.calculate(weight, reps),
-            isPrimary: formula.isPrimary || false
-        }));
-
-        // Sort results descending by value
-        results.sort((a, b) => b.value - a.value);
-
-        const average = results.reduce((sum, r) => sum + r.value, 0) / results.length;
-
-        if (resultsGrid) {
-            resultsGrid.innerHTML = results.map(r => `
-                <div class="result-card${r.isPrimary ? ' primary' : ''}" 
-                     data-value="${r.value.toFixed(1)}" 
-                     data-formula="${r.name}"
-                     style="cursor: pointer;">
-                    <div class="formula-name">${r.name}</div>
-                    <div class="formula-value">${r.value.toFixed(1)} kg</div>
-                </div>
-            `).join('');
-
-            // Add click listeners to cards
-            document.querySelectorAll('.result-card').forEach(card => {
-                card.addEventListener('click', function () {
-                    const value = this.dataset.value;
-                    const formulaName = this.dataset.formula;
-
-                    // Update 1RM input
-                    if (manualOneRmInput) {
-                        manualOneRmInput.value = value;
-                    }
-
-                    // Update Formula Select
-                    if (formulaSelect) {
-                        formulaSelect.value = formulaName;
-                    }
-
-                    // Trigger update
-                    updateRepTable();
-
-                    // Visual feedback
-                    document.querySelectorAll('.result-card').forEach(c => c.style.borderColor = '');
-                    if (!this.classList.contains('primary')) {
-                        this.style.borderColor = 'var(--accent-primary)';
-                    }
-                });
-            });
-        }
-
-        animateValue(averageVal, 0, average, 1000);
-
-        resultsSection.style.display = 'block';
-
-        // Memorizza ultimi valori e media
+        // Memorizza ultimi valori
         lastWeight = weight;
         lastReps = reps;
-        latestAverageOneRm = average;
+
+        // Render con filtri attivi
+        renderResultsAndAverage(weight, reps);
 
         // Update Chart (modalità corrente)
         updateChart(weight, reps);
@@ -367,7 +407,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (manualOneRmInput) {
-            manualOneRmInput.value = average.toFixed(1);
             updateRepTable();
         }
     }
@@ -385,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let estimatedWeight;
 
             if (selectedFormula === 'average') {
-                const weights = inverseFormulas.map(f => f.calculateWeight(oneRm, reps));
+                const weights = getActiveInverseFormulas().map(f => f.calculateWeight(oneRm, reps));
                 estimatedWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
             } else {
                 const formula = inverseFormulas.find(f => f.name === selectedFormula);
@@ -445,7 +484,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Generate datasets per ogni formula (modalità Peso vs Ripetizioni)
         // Calcolo l'1RM specifico della formula in base agli input correnti,
         // poi uso la formula inversa per determinare il peso necessario per ogni r (1–20).
-        let datasets = formulas.map((formula, index) => {
+        const activeFormulas = getActiveFormulas();
+        let datasets = activeFormulas.map((formula, index) => {
             const oneRmForFormula = formula.calculate(weight, reps);
             const inv = inverseFormulas.find(f => f.name === formula.name);
             const data = labels.map(r => {
@@ -471,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Other formulas use generated colors
-            const hue = (index * 360 / formulas.length) % 360;
+            const hue = (index * 360 / activeFormulas.length) % 360;
             const borderColor = `hsla(${hue}, 70%, 50%, 1)`;
 
             return {
@@ -490,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Modalità alternativa: X = Peso (kg), Y = Ripetizioni (a 1RM medio)
         if (isRepsVsWeight) {
             // Usa un target 1RM specifico per ogni formula, calcolato dai valori inseriti
-            const targetsPerFormula = formulas.map(f => f.calculate(weight, reps));
+            const targetsPerFormula = activeFormulas.map(f => f.calculate(weight, reps));
 
             // Definisci un range di ricerca ampio e trova le soglie dinamiche:
             // - inizio: primo peso dove almeno una formula dà reps < 20
@@ -518,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let wRightCandidate = null;
 
             for (let w = baseMin; w <= baseMax; w += step) {
-                const repsForW = formulas.map((formula, idx) => predictRepsForWeight(formula, w, targetsPerFormula[idx]));
+                const repsForW = activeFormulas.map((formula, idx) => predictRepsForWeight(formula, w, targetsPerFormula[idx]));
                 if (wLeftCandidate === null && repsForW.some(r => r < 20)) {
                     wLeftCandidate = w;
                 }
@@ -547,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             
 
-            datasets = formulas.map((formula, index) => {
+            datasets = activeFormulas.map((formula, index) => {
                 const data = labels.map(w => predictRepsForWeight(formula, w, targetsPerFormula[index]));
                 if (formula.isPrimary) {
                     const isPrimaryHevy = formula.name === 'hevy';
@@ -563,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         order: 0
                     };
                 }
-                const hue = (index * 360 / formulas.length) % 360;
+                const hue = (index * 360 / activeFormulas.length) % 360;
                 const borderColor = `hsla(${hue}, 70%, 50%, 1)`;
                 return {
                     label: ' ' + formula.name,
@@ -799,6 +839,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (manualOneRmInput) {
         manualOneRmInput.addEventListener('input', updateRepTable);
     }
+
+    // Popola il select iniziale in base alla modalità default (non esperti)
+    populateFormulaSelect();
 
     // Gestore per il pulsante toggle del grafico
     const toggleChartBtn = document.getElementById('toggle-chart-btn');
