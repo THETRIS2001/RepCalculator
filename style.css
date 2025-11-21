@@ -1179,8 +1179,8 @@ h2 {
     }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
+/* Dark mode support - disabilitato per mantenere design coerente */
+/* @media (prefers-color-scheme: dark) {
     :root {
         --bg-primary: #0f172a;
         --bg-secondary: #1e293b;
@@ -1195,4 +1195,4 @@ h2 {
         background: var(--bg-primary);
         color: var(--text-primary);
     }
-}
+} */
