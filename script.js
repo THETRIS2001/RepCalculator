@@ -712,7 +712,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 tooltipEl.className = 'chartjs-tooltip';
                                 tooltipEl.style.pointerEvents = 'none';
                                 tooltipEl.style.position = 'absolute';
-                                tooltipEl.style.transform = 'translate(-50%, 0)';
+                                // Posizionamento manuale, senza centrare tramite transform
+                                tooltipEl.style.transform = 'translate(0, 0)';
                                 tooltipEl.style.transition = 'all .1s ease';
                                 tooltipEl.style.background = 'rgba(255, 255, 255, 0.95)';
                                 tooltipEl.style.border = '1px solid #e2e8f0';
@@ -721,6 +722,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 tooltipEl.style.padding = '12px';
                                 tooltipEl.style.zIndex = '999';
                                 tooltipEl.style.fontFamily = "'Outfit', sans-serif";
+                                tooltipEl.style.boxSizing = 'border-box';
+                                const fixedWidth = (window.innerWidth < 768) ? 300 : 360;
+                                tooltipEl.style.width = fixedWidth + 'px';
+                                tooltipEl.style.minWidth = fixedWidth + 'px';
+                                tooltipEl.style.maxWidth = fixedWidth + 'px';
                                 chart.canvas.parentNode.appendChild(tooltipEl);
                             }
 
@@ -760,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const valueHtml = isRepsVsWeight
                                     ? `${Math.round(item.parsed.y)} Reps`
                                     : `${(Math.round(item.parsed.y * 10) / 10).toFixed(1)} Kg`;
-                                innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;">${labelHtml}: ${valueHtml}</div>`;
+                                innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;white-space:nowrap;">${labelHtml}: ${valueHtml}</div>`;
                             }
 
                             tooltipEl.innerHTML = innerHtml;
@@ -768,7 +774,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Posizionamento vicino al cursore
                             const { offsetLeft, offsetTop } = chart.canvas;
                             tooltipEl.style.opacity = '1';
-                            tooltipEl.style.left = offsetLeft + tooltip.caretX + 'px';
+                            const parentWidth = chart.canvas.clientWidth;
+                            const fixedWidth = (window.innerWidth < 768) ? 300 : 360;
+                            const margin = 8;
+                            let left = offsetLeft + tooltip.caretX - (fixedWidth / 2);
+                            const minLeft = offsetLeft + margin;
+                            const maxLeft = offsetLeft + parentWidth - fixedWidth - margin;
+                            if (left < minLeft) left = minLeft;
+                            if (left > maxLeft) left = maxLeft;
+                            tooltipEl.style.left = left + 'px';
                             tooltipEl.style.top = offsetTop + tooltip.caretY + 12 + 'px';
                         }
                     },
