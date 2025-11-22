@@ -850,6 +850,46 @@ h2 {
     color: var(--text-primary);
 }
 
+/* Legenda HTML esterna al grafico */
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 10px;
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.chart-legend-item:hover {
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.chart-legend-item.disabled {
+    opacity: 0.55;
+    text-decoration: line-through;
+}
+
+.chart-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
 /* Rep Max Section Styles */
 .rep-max-section {
     margin-top: 80px;

@@ -648,12 +648,43 @@ document.addEventListener('DOMContentLoaded', function() {
             rmChart.destroy();
         }
 
+        // Plugin di legenda HTML esterna: mantiene costante l'altezza del grafico
+        const getLegendContainer = (id) => document.getElementById(id);
+        const htmlLegendPlugin = {
+            id: 'htmlLegend',
+            afterUpdate(chart, args, opts) {
+                const containerID = opts && opts.containerID ? opts.containerID : 'chart-legend';
+                const container = getLegendContainer(containerID);
+                if (!container) return;
+                // Pulisci e ricrea la legenda
+                container.innerHTML = '';
+                const items = chart.options.plugins.legend.labels.generateLabels(chart);
+                items.forEach((item) => {
+                    const el = document.createElement('div');
+                    el.className = 'chart-legend-item' + (item.hidden ? ' disabled' : '');
+                    const swatch = document.createElement('span');
+                    swatch.className = 'chart-legend-swatch';
+                    swatch.style.background = item.strokeStyle;
+                    const label = document.createElement('span');
+                    label.textContent = item.text;
+                    el.appendChild(swatch);
+                    el.appendChild(label);
+                    el.onclick = () => {
+                        chart.toggleDataVisibility(item.datasetIndex);
+                        chart.update();
+                    };
+                    container.appendChild(el);
+                });
+            }
+        };
+
         rmChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: datasets
             },
+            plugins: [htmlLegendPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -684,13 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         padding: window.innerWidth < 768 ? 16 : 20
                     },
                     legend: {
-                        position: 'bottom',
-                        fullSize: false,
-                        padding: window.innerWidth < 768 ? 4 : 10,
-                        title: {
-                            display: true,
-                            padding: window.innerWidth < 768 ? 10 : 20
-                        },
+                        display: false,
                         labels: {
                             usePointStyle: true,
                             boxWidth: window.innerWidth < 768 ? 6 : 8,
@@ -699,6 +724,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 size: window.innerWidth < 768 ? 10 : 11
                             }
                         }
+                    },
+                    htmlLegend: {
+                        containerID: 'chart-legend'
                     },
                     tooltip: {
                         enabled: false,
@@ -884,6 +912,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Su mobile usiamo flex per rispettare il layout
                 const isMobile = window.innerWidth <= 600;
                 chartContainer.style.display = isMobile ? 'flex' : 'block';
+                const legendEl = document.getElementById('chart-legend');
+                if (legendEl) legendEl.style.display = 'block';
                 toggleChartBtn.textContent = 'Nascondi Grafico';
                 toggleChartBtn.classList.add('active');
                 if (switchChartBtn) {
@@ -891,6 +921,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 chartContainer.style.display = 'none';
+                const legendEl = document.getElementById('chart-legend');
+                if (legendEl) legendEl.style.display = 'none';
                 toggleChartBtn.textContent = 'Mostra Grafico';
                 toggleChartBtn.classList.remove('active');
                 if (switchChartBtn) {
@@ -920,9 +952,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 rmChart.resize();
                 rmChart.options.plugins.title.font.size = window.innerWidth < 768 ? 14 : 16;
                 rmChart.options.plugins.title.padding = window.innerWidth < 768 ? 16 : 20;
-                rmChart.options.plugins.legend.labels.font.size = window.innerWidth < 768 ? 10 : 11;
-                rmChart.options.plugins.legend.labels.boxWidth = window.innerWidth < 768 ? 6 : 8;
-                rmChart.options.plugins.legend.title.padding = window.innerWidth < 768 ? 10 : 20;
+                // Aggiorna la legenda HTML ricreandola al prossimo update
                 rmChart.update('none');
             }, 100);
         }
