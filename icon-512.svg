@@ -1,6 +1,12 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo tema -->
   <rect width="512" height="512" rx="50" fill="#4f46e5"/>
-  <path d="M256 100L256 412M100 256L412 256" stroke="white" stroke-width="30" stroke-linecap="round"/>
-  <path d="M256 256L300 212M256 256L300 300" stroke="white" stroke-width="20" stroke-linecap="round"/>
-  <circle cx="256" cy="256" r="20" fill="white"/>
+  <!-- Bilanciere: barra orizzontale -->
+  <rect x="96" y="245" width="320" height="22" rx="11" fill="white"/>
+  <!-- Piastre sinistra -->
+  <rect x="96" y="181" width="32" height="150" rx="8" fill="white"/>
+  <rect x="139" y="203" width="21" height="107" rx="5" fill="white"/>
+  <!-- Piastre destra -->
+  <rect x="384" y="181" width="32" height="150" rx="8" fill="white"/>
+  <rect x="363" y="203" width="21" height="107" rx="5" fill="white"/>
 </svg>

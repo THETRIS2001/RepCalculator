@@ -664,14 +664,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     el.className = 'chart-legend-item' + (item.hidden ? ' disabled' : '');
                     const swatch = document.createElement('span');
                     swatch.className = 'chart-legend-swatch';
-                    swatch.style.background = item.strokeStyle;
+                    // Colore swatch robusto
+                    swatch.style.background = item.strokeStyle || item.fillStyle || '#64748b';
                     const label = document.createElement('span');
                     label.textContent = item.text;
                     el.appendChild(swatch);
                     el.appendChild(label);
-                    el.onclick = () => {
-                        chart.toggleDataVisibility(item.datasetIndex);
+                    // Accessibilità
+                    el.setAttribute('role', 'button');
+                    el.setAttribute('tabindex', '0');
+                    const toggle = () => {
+                        const idx = (item.datasetIndex != null) ? item.datasetIndex : (item.index != null ? item.index : null);
+                        if (idx == null) return;
+                        const visible = chart.isDatasetVisible(idx);
+                        chart.setDatasetVisibility(idx, !visible);
                         chart.update();
+                    };
+                    el.onclick = toggle;
+                    el.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggle();
+                        }
                     };
                     container.appendChild(el);
                 });
