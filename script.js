@@ -244,7 +244,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const opt = document.createElement('option');
             opt.value = f.name;
             opt.textContent = f.name;
-            if (f.isPrimary) opt.classList.add('primary-formula');
+            // Evidenziazione solo in modalità esperti
+            if (expertMode && f.isPrimary) opt.classList.add('primary-formula');
             formulaSelect.appendChild(opt);
         });
         // Ripristina selezione se ancora valida, altrimenti fallback a average
@@ -338,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (resultsGrid) {
             resultsGrid.innerHTML = results.map(r => `
-                <div class="result-card${r.isPrimary ? ' primary' : ''}" 
+                <div class="result-card${(expertMode && r.isPrimary) ? ' primary' : ''}" 
                      data-value="${r.value.toFixed(1)}" 
                      data-formula="${r.name}"
                      style="cursor: pointer;">
