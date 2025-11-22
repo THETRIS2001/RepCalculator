@@ -723,10 +723,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 tooltipEl.style.zIndex = '999';
                                 tooltipEl.style.fontFamily = "'Outfit', sans-serif";
                                 tooltipEl.style.boxSizing = 'border-box';
-                                const fixedWidth = (window.innerWidth < 768) ? 300 : 360;
-                                tooltipEl.style.width = fixedWidth + 'px';
-                                tooltipEl.style.minWidth = fixedWidth + 'px';
-                                tooltipEl.style.maxWidth = fixedWidth + 'px';
+                                // Larghezza auto, verrà misurata dopo aver popolato i contenuti
+                                tooltipEl.style.display = 'inline-block';
+                                tooltipEl.style.width = 'auto';
+                                tooltipEl.style.minWidth = 'auto';
+                                tooltipEl.style.maxWidth = 'none';
                                 chart.canvas.parentNode.appendChild(tooltipEl);
                             }
 
@@ -757,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             // Costruzione HTML: titolo e righe dei dataset
                             let innerHtml = '';
-                            innerHtml += `<div style="color:#0f172a;font-weight:600;font-size:${window.innerWidth < 768 ? 14 : 16}px;margin-bottom:8px;">${titleText}</div>`;
+                            innerHtml += `<div style="color:#0f172a;font-weight:600;font-size:${window.innerWidth < 768 ? 14 : 16}px;margin-bottom:8px;white-space:nowrap;">${titleText}</div>`;
 
                             for (const item of items) {
                                 const datasetLabel = item.dataset && item.dataset.label ? item.dataset.label : '';
@@ -771,15 +772,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             tooltipEl.innerHTML = innerHtml;
 
+                            // Misura larghezza minima necessaria (senza andare a capo)
+                            const contentWidth = tooltipEl.scrollWidth; // include padding
+                            tooltipEl.style.width = contentWidth + 'px';
+
                             // Posizionamento vicino al cursore
                             const { offsetLeft, offsetTop } = chart.canvas;
                             tooltipEl.style.opacity = '1';
                             const parentWidth = chart.canvas.clientWidth;
-                            const fixedWidth = (window.innerWidth < 768) ? 300 : 360;
+                            const measuredWidth = tooltipEl.offsetWidth;
                             const margin = 8;
-                            let left = offsetLeft + tooltip.caretX - (fixedWidth / 2);
+                            let left = offsetLeft + tooltip.caretX - (measuredWidth / 2);
                             const minLeft = offsetLeft + margin;
-                            const maxLeft = offsetLeft + parentWidth - fixedWidth - margin;
+                            const maxLeft = offsetLeft + parentWidth - measuredWidth - margin;
                             if (left < minLeft) left = minLeft;
                             if (left > maxLeft) left = maxLeft;
                             tooltipEl.style.left = left + 'px';
