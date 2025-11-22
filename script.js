@@ -54,6 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Solo su mobile: posiziona il pulsante "Versione Esperti" sopra "Mostra Grafico"
+    const expertModeBtnEl = document.getElementById('expert-mode-btn');
+    if (window.innerWidth <= 600 && expertModeBtnEl && toggleChartBtnEl) {
+        toggleChartBtnEl.insertAdjacentElement('beforebegin', expertModeBtnEl);
+    }
+
     // Percentage tables for hevy and Proj Invictus
     const hevyPercentages = [100, 97, 94, 92, 89, 86, 83, 81, 78, 75, 73, 71, 70, 68, 67, 65, 64, 63, 61, 60];
     const projectInvictusPercentages = [100, 95, 92, 89, 86, 83, 81, 79, 77, 75, 73, 71, 70, 68, 67, 65, 64, 63, 62, 61];

@@ -514,18 +514,29 @@ h2 {
 }
 
 .expert-mode-btn {
-    align-self: flex-end;
-    font-size: 1.1rem;
-    padding: 12px 20px;
-    border-radius: 12px;
-    background: white;
-    color: var(--accent-primary);
-    box-shadow: var(--card-shadow);
+    background: transparent;
     border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 12px;
+}
+.expert-mode-btn:hover {
+    color: var(--text-primary);
+    background: var(--input-bg);
+    opacity: 1;
 }
 .expert-mode-btn.active {
-    background: var(--accent-primary);
-    color: white;
+    background: white;
+    color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    opacity: 1;
 }
     
     .toggle-chart-btn {
