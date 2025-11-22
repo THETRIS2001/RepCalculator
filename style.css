@@ -64,6 +64,31 @@ h1 {
     font-weight: 400;
 }
 
+/* Bottone Versione Esperti - stile globale desktop */
+.expert-mode-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.expert-mode-btn:hover {
+    color: var(--text-primary);
+    background: var(--input-bg);
+}
+
+.expert-mode-btn.active {
+    background: white;
+    color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 .input-section {
     background: var(--card-bg);
     padding: 25px;

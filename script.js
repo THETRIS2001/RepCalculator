@@ -774,7 +774,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             // Misura larghezza minima necessaria (senza andare a capo)
                             const contentWidth = tooltipEl.scrollWidth; // include padding
-                            tooltipEl.style.width = contentWidth + 'px';
+                            tooltipEl.style.width = (contentWidth + 5) + 'px';
 
                             // Posizionamento vicino al cursore
                             const { offsetLeft, offsetTop } = chart.canvas;
