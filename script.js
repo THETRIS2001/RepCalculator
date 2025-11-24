@@ -746,6 +746,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         enabled: false,
                         external: function (context) {
                             const { chart, tooltip } = context;
+                            // Larghezza fissa del tooltip: mobile vs desktop
+                            const baseWidth = window.innerWidth < 768 ? 200 : 240;
                             let tooltipEl = chart.canvas.parentNode.querySelector('.chartjs-tooltip');
 
                             // Crea l'elemento tooltip se non esiste
@@ -765,11 +767,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 tooltipEl.style.zIndex = '999';
                                 tooltipEl.style.fontFamily = "'Outfit', sans-serif";
                                 tooltipEl.style.boxSizing = 'border-box';
-                                // Larghezza auto, verrà misurata dopo aver popolato i contenuti
+                                // Larghezza fissa per prevenire variazioni durante l'hover
                                 tooltipEl.style.display = 'inline-block';
-                                tooltipEl.style.width = 'auto';
-                                tooltipEl.style.minWidth = 'auto';
-                                tooltipEl.style.maxWidth = 'none';
+                                tooltipEl.style.width = baseWidth + 'px';
+                                tooltipEl.style.minWidth = baseWidth + 'px';
+                                tooltipEl.style.maxWidth = baseWidth + 'px';
                                 chart.canvas.parentNode.appendChild(tooltipEl);
                             }
 
@@ -800,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                             // Costruzione HTML: titolo e righe dei dataset
                             let innerHtml = '';
-                            innerHtml += `<div style="color:#0f172a;font-weight:600;font-size:${window.innerWidth < 768 ? 14 : 16}px;margin-bottom:8px;white-space:nowrap;">${titleText}</div>`;
+                            innerHtml += `<div style="color:#0f172a;font-weight:600;font-size:${window.innerWidth < 768 ? 14 : 16}px;margin-bottom:8px;white-space:normal;overflow-wrap:anywhere;">${titleText}</div>`;
 
                             for (const item of items) {
                                 const datasetLabel = item.dataset && item.dataset.label ? item.dataset.label : '';
@@ -809,14 +811,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const valueHtml = isRepsVsWeight
                                     ? `${Math.round(item.parsed.y)} Reps`
                                     : `${(Math.round(item.parsed.y * 10) / 10).toFixed(1)} Kg`;
-                                innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;white-space:nowrap;">${labelHtml}: ${valueHtml}</div>`;
+                                innerHtml += `<div style="color:#64748b;font-weight:${bold ? 700 : 400};font-size:${window.innerWidth < 768 ? 12 : 13}px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;">${labelHtml}: ${valueHtml}</div>`;
                             }
 
                             tooltipEl.innerHTML = innerHtml;
 
-                            // Misura larghezza minima necessaria (senza andare a capo)
-                            const contentWidth = tooltipEl.scrollWidth; // include padding
-                            tooltipEl.style.width = (contentWidth + 5) + 'px';
+                            // Imposta larghezza fissa del tooltip ad ogni aggiornamento
+                            tooltipEl.style.width = baseWidth + 'px';
+                            tooltipEl.style.minWidth = baseWidth + 'px';
+                            tooltipEl.style.maxWidth = baseWidth + 'px';
 
                             // Posizionamento vicino al cursore
                             const { offsetLeft, offsetTop } = chart.canvas;
