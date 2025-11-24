@@ -791,10 +791,27 @@ document.addEventListener('DOMContentLoaded', function() {
                             const minVal = hasValues ? Math.min(...values) : null;
                             const maxVal = hasValues ? Math.max(...values) : null;
                             const roundToTenth = (val) => Math.round(val * 10) / 10;
+
+                            // Uguaglianza determinata dopo arrotondamento
+                            const minReps = hasValues ? Math.round(minVal) : null;
+                            const maxReps = hasValues ? Math.round(maxVal) : null;
+                            const minKg = hasValues ? roundToTenth(minVal) : null;
+                            const maxKg = hasValues ? roundToTenth(maxVal) : null;
+                            const isSingle = hasValues
+                                ? (isRepsVsWeight
+                                    ? (minReps === maxReps)
+                                    : (minKg === maxKg))
+                                : false;
+
+                            // Intervallo sempre tra parentesi quadre, con valori arrotondati
                             const intervalText = hasValues
                                 ? (isRepsVsWeight
-                                    ? `[${Math.round(minVal)} Reps - ${Math.round(maxVal)} Reps]`
-                                    : `[${roundToTenth(minVal).toFixed(1)} Kg - ${roundToTenth(maxVal).toFixed(1)} Kg]`)
+                                    ? (isSingle
+                                        ? `[${minReps} Reps]`
+                                        : `[${minReps} Reps - ${maxReps} Reps]`)
+                                    : (isSingle
+                                        ? `[${minKg.toFixed(1)} Kg]`
+                                        : `[${minKg.toFixed(1)} Kg - ${maxKg.toFixed(1)} Kg]`))
                                 : '';
                             const titleText = isRepsVsWeight
                                 ? `${Math.round(Number(xLabel))} Kg ${intervalText}`
