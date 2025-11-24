@@ -1,11 +1,14 @@
-const CACHE_NAME = '1rm-calculator-v4';
+const CACHE_NAME = '1rm-calculator-v5';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './script.js',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 // Installazione Service Worker
